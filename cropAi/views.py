@@ -8,23 +8,19 @@ import tensorflow as tf
 import os
 import io
 
-# Load Maize Validator model (Is this a maize leaf?)
-VALIDATOR_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'maize_leaf_validator.h5')
+# Load the best model
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'best_model.h5')
 try:
-    validator_model = tf.keras.models.load_model(VALIDATOR_MODEL_PATH)
+    model = tf.keras.models.load_model(MODEL_PATH)
+    print("✅ Model loaded successfully!")
 except Exception as e:
-    print(f"Validator model failed to load: {e}")
-    validator_model = None
+    print(f"❌ Failed to load model: {e}")
+    model = None
 
-# Load Maize Disease Classifier model
-DISEASE_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'maize_model.h5')
-try:
-    disease_model = tf.keras.models.load_model(DISEASE_MODEL_PATH)
-except Exception as e:
-    print(f"Disease model failed to load: {e}")
-    disease_model = None
+# Class labels mapping (must match your training data order)
+CLASS_LABELS = ['Blight', 'Common_Rust', 'Gray_Leaf_Spot', 'Healthy', 'Non_Maize_Leaf']
 
-# Labels for the disease model
+
 DISEASE_LABELS = {
     0: {
         "name": "Maize Blight",
@@ -39,15 +35,17 @@ DISEASE_LABELS = {
             "Avoid overhead irrigation",
             "Remove and burn infected plant debris after harvest",
             "Rotate with non-cereal crops for 2 seasons"
+           
         ],
     },
     1: {
         "name": "Maize Rust",
-        "cause": "Fungus that thrives in cool (15-22°C), humid conditions.",
+        "cause": "Fungus that thrives in cool (15-22°C), humid conditions. Spreads quickly when dew remains on leaves for long periods. Often comes with late planting.",
         "treatment": [
-            "Fungicides: Use AMISTAR TOP 325SC or ABSOLUTE 375SC",
+            "Fungicides: Use AMISTAR TOP 325SC (azoxystrobin + difenoconazole) or ABSOLUTE 375SC (trifloxystrobin + tebuconazole)",
             "Spray early at first sign of yellow spots",
-            "Repeat after heavy rains"
+            "Mix with sticker/spreader for better coverage",
+            "Repeat after heavy rains wash off fungicide"
         ],
         "prevention": [
             "Plant early before rains peak",
@@ -60,74 +58,103 @@ DISEASE_LABELS = {
         "name": "Leaf Spot",
         "cause": "Soil-borne fungus that splashes onto leaves during rains.",
         "treatment": [
-            "Fungicides: Use RIDOMIL GOLD 66WP or LOCKER 720WP",
-            "Spray before flowering stage",
-            "Ensure coverage of lower leaves"
+            "Fungicides: Use RIDOMIL GOLD 66WP (metalaxyl-M + mancozeb) or LOCKER 720WP (mancozeb + cymoxanil)",
+            "Begin sprays before flowering stage",
+            "Ensure good coverage of lower leaves",
+            "Combine with foliar fertilizer for recovery"
         ],
         "prevention": [
-            "Crop rotation with legumes",
+            "Practice crop rotation with legumes",
             "Improve field drainage",
-            "Burn or bury crop residues",
+            "Burn or bury crop residues deeply",
             "Use certified disease-free seeds"
         ],
+       
     },
     3: {
         "name": "Healthy Maize",
         "cause": "No disease detected",
         "treatment": [
             "Continue good management practices",
-            "Monitor field weekly for early signs"
+            "Monitor field weekly for early signs",
+            "Maintain balanced fertilizer application"
         ],
         "prevention": [
             "Rotate crops annually",
             "Use resistant varieties",
-            "Control weeds",
-            "Test soil and maintain pH 5.8–7.0"
+            "Control weeds that host pests/diseases",
+            "Test soil and correct pH (optimal 5.8-7.0)"
         ],
     }
 }
 
 
+
 @api_view(['POST'])
 def predict(request):
-    """Predict disease if image is a maize leaf"""
-    if not disease_model or not validator_model:
-        return Response({"success": False, "error": "Model(s) not loaded"}, status=503)
+    """Prediction endpoint with terminal printing"""
+    if not model:
+        print("Model not loaded - service unavailable")
+        return Response({"success": False, "error": "Model not loaded"}, status=503)
 
     if 'image' not in request.FILES:
+        print("No image file provided in request")
         return Response({
             "success": False,
-            "error": "No image file provided",
+            "error": "No image file provided"
         }, status=400)
 
-    image_file = request.FILES['image']
-    
     try:
-        # Read image from memory
-        file_bytes = b''.join(chunk for chunk in image_file.chunks())
+        # Process image
+        image_file = request.FILES['image']
+        print(f"Processing image: {image_file.name} ({image_file.size} bytes)")
+        
+        file_bytes = b''
+        for chunk in image_file.chunks():
+            file_bytes += chunk
+        
         img = Image.open(io.BytesIO(file_bytes)).convert('RGB')
-        img.verify()  # verify image integrity
+        img.verify()
         img = Image.open(io.BytesIO(file_bytes)).convert('RGB')
-
-        # Preprocess for model
+        
+        # Preprocess
         img = img.resize((224, 224))
         img_array = tf.keras.preprocessing.image.img_to_array(img) / 255.0
         img_array = tf.expand_dims(img_array, axis=0)
-
-        # Step 1: Check if it's a maize leaf
-        validator_pred = validator_model.predict(img_array)[0][0]  # sigmoid
-        if validator_pred < 0.5:
-            return Response({
-                "success": False,
-                "error": "This image is not a maize leaf. Please upload a valid maize leaf photo."
-            }, status=200)
-
-        # Step 2: Predict maize disease
-        predictions = disease_model.predict(img_array)
+        
+        # Predict
+        print("Making prediction...")
+        predictions = model.predict(img_array)
         class_id = int(np.argmax(predictions[0]))
         confidence = float(np.max(predictions[0]))
+        predicted_class = CLASS_LABELS[class_id]
+        
+        print(f"Prediction: {predicted_class} (Confidence: {confidence:.2%})")
 
+        # Check if maize leaf
+        if predicted_class == 'Non_Maize_Leaf':
+            print("Rejected - Not a maize leaf")
+            return Response({
+                "success": False,
+                "error": "This image is not a maize leaf. Please upload a valid maize leaf photo.",
+                "confidence": confidence
+            }, status=200)
+        
+        # If maize leaf
+        print(f"Disease detected: {DISEASE_LABELS[class_id]['name']}")
         return Response({
+            "success": True,
+            "is_maize_leaf": True,
+            "prediction": DISEASE_LABELS[class_id]["name"],
+            "confidence": confidence,
+            "cause": DISEASE_LABELS[class_id]["cause"],
+            "treatment": DISEASE_LABELS[class_id]["treatment"],
+            "prevention": DISEASE_LABELS[class_id]["prevention"]
+        })
+        
+
+        """
+          return Response({
             "success": True,
             "prediction": DISEASE_LABELS[class_id]["name"],
             "confidence": confidence,
@@ -135,20 +162,16 @@ def predict(request):
             "treatment": DISEASE_LABELS[class_id]["treatment"],
             "prevention": DISEASE_LABELS[class_id]["prevention"]
         })
+        """
+
 
     except Exception as e:
+        print(f"⚠️ Prediction error: {e}")
         return Response({
             "success": False,
             "error": "Image processing failed",
             "details": str(e)
         }, status=400)
 
-
 def index(request):
     return render(request, 'cropAi/index.html')
-
-
-
-
-
-
