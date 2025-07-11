@@ -21,4 +21,8 @@ ENV PYTHONUNBUFFERED 1
 ENV PORT 8000
 
 # Run Gunicorn with reduced workers (memory optimization)
+EXPOSE 8000
+
+
 CMD ["gunicorn", "--workers=2", "--threads=4", "--bind", "0.0.0.0:8000", "--timeout", "120", "backend.wsgi:application"]
+
