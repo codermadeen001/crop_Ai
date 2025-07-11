@@ -1,5 +1,4 @@
-# Dockerfile
-FROM python:3.11-slim  
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -17,16 +16,10 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Set environment variables
-ENV PYTHONUNBUFFERED 1
-ENV PORT 8000
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
-# Run Gunicorn with reduced workers (memory optimization)
 EXPOSE 8000
 
-
-
-
-CMD ["gunicorn","--workers=2","--threads=4","--bind","0.0.0.0:8000","--timeout","120","backend.wsgi:application"]
-
-
-#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Use shell form CMD to allow $PORT expansion
+CMD gunicorn --workers=2 --threads=4 --bind 0.0.0.0:$PORT --timeout 120 backend.wsgi:application
