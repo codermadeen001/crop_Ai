@@ -8,8 +8,18 @@ import tensorflow as tf
 import os
 import io
 
+from pathlib import Path
+
 # Load the best model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'best_model.h5')
+#MODEL_PATH = os.path.join(os.path.dirname(__file__), 'best_model.h5')
+
+MODEL_PATH = Path(__file__).parent / "best_model.h5"
+
+
+#MODEL_PATH = os.path.join(settings.STATIC_ROOT, 'cropAi', 'best_model.h5')
+
+
+
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
     print("✅ Model loaded successfully!")

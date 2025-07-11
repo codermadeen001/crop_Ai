@@ -59,5 +59,5 @@ model.compile(
 model.summary()  # Verify model architecture
 
 model.fit(train_ds, validation_data=val_ds, epochs=5)
-model.save("maize_model.h5")
-print("✅ Model saved as maize_model.h5")
+model.save("maize_model_V2.h5")
+print("✅ maize_model_V2.h5")
