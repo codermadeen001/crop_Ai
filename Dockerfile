@@ -25,10 +25,10 @@ COPY . .
 # Runtime config
 ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
-    TF_CPP_MIN_LOG_LEVEL=2 
-# Fixed CMD - either use direct port or shell form for variable expansion
-#CMD ["gunicorn", "--workers=2", "--threads=4", "--bind", "0.0.0.0:8000", "--timeout", "120", "backend.wsgi:application"]
+    TF_CPP_MIN_LOG_LEVEL=2
 
+# Solution 1: Hardcoded port (recommended for Render)
+CMD ["gunicorn", "--workers=2", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
 
-# Replace the CMD line with this:
-CMD ["gunicorn", "--workers=2", "--bind", "0.0.0.0:$PORT", "backend.wsgi:application"]
+# OR Solution 2: Shell form for variable expansion (alternative)
+# CMD gunicorn --workers=2 --bind 0.0.0.0:$PORT backend.wsgi:application
