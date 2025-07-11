@@ -21,5 +21,9 @@ ENV PORT=8000
 
 EXPOSE 8000
 
+#CMD ["gunicorn", "--workers=2", "--threads=4", "--bind", "0.0.0.0:8000", "--timeout", "120", "backend.wsgi:application"]
+
+
 # Use shell form CMD to allow $PORT expansion
-CMD gunicorn --workers=2 --threads=4 --bind 0.0.0.0:$PORT --timeout 120 backend.wsgi:application
+#CMD gunicorn --workers=2 --threads=4 --bind 0.0.0.0:$PORT --timeout 120 backend.wsgi:application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
