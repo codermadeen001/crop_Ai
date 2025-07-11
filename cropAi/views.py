@@ -1,3 +1,4 @@
+"""
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -26,6 +27,56 @@ try:
 except Exception as e:
     print(f"❌ Failed to load model: {e}")
     model = None
+"""
+
+
+
+
+python
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from django.shortcuts import render
+import numpy as np
+from PIL import Image
+import tensorflow as tf
+import os
+import io
+from pathlib import Path
+
+# Load model with multi-path fallback
+def load_model():
+    # Try both possible locations
+    paths = [
+        Path(__file__).parent / "best_model.h5",  # Local development
+        Path("/app/backend/cropAi/best_model.h5")  # Docker production
+    ]
+    
+    for path in paths:
+        try:
+            if path.exists():
+                print(f"✅ Found model at: {path}")
+                return tf.keras.models.load_model(str(path))
+        except Exception as e:
+            print(f"⚠️ Failed at {path}: {e}")
+    
+    raise FileNotFoundError(
+        f"Model not found at:\n"
+        f"1. {paths[0]}\n"
+        f"2. {paths[1]}\n"
+        f"Current dir: {os.getcwd()}\n"
+        f"Files here: {os.listdir(Path(__file__).parent)}"
+    )
+
+model = load_model()  # Will crash on startup if model is missing
+
+
+
+
+
+
+
+
 
 # Class labels mapping (must match your training data order)
 CLASS_LABELS = ['Blight', 'Common_Rust', 'Gray_Leaf_Spot', 'Healthy', 'Non_Maize_Leaf']

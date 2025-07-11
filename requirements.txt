@@ -14,7 +14,7 @@ requests
 
 bing-image-downloader
 scipy
-
+pillow
 
 
 
