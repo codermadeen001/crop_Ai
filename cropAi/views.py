@@ -44,6 +44,8 @@ import os
 import io
 from pathlib import Path
 
+
+"""
 # Load model with multi-path fallback
 def load_model():
     # Try both possible locations
@@ -70,6 +72,41 @@ def load_model():
 
 model = load_model()  # Will crash on startup if model is missing
 
+"""
+
+
+
+
+
+# Load model with absolute path certainty
+def load_model():
+    # All possible locations (relative to views.py)
+    possible_paths = [
+        Path(__file__).parent / "best_model.h5",  # Same directory
+        Path(__file__).parent.parent / "cropAi" / "best_model.h5",  # One level up
+        Path("/app/cropAi/best_model.h5")  # Absolute Docker path
+    ]
+    
+    for path in possible_paths:
+        path = path.absolute()  # Convert to absolute path
+        try:
+            if path.exists():
+                print(f"✅ Found model at: {path}")
+                return tf.keras.models.load_model(str(path))
+            else:
+                print(f"⚠️ Path doesn't exist: {path}")
+        except Exception as e:
+            print(f"⚠️ Load failed at {path}: {e}")
+    
+    # Crash with complete debug info
+    raise FileNotFoundError(
+        f"Model not found. Checked:\n" +
+        "\n".join(f"{i+1}. {p}" for i, p in enumerate(possible_paths)) +
+        f"\nCurrent directory: {Path.cwd()}\n" +
+        f"Files here: {os.listdir(Path(__file__).parent)}"
+    )
+
+model = load_model()  # Will fail fast if model is missing
 
 
 
