@@ -26,5 +26,5 @@ COPY . .
 ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
     TF_CPP_MIN_LOG_LEVEL=2 
-
-CMD ["gunicorn", "--workers=2", "--threads=4", "--bind", "0.0.0.0:$PORT", "--timeout", "120", "backend.wsgi:application"]
+# Fixed CMD - either use direct port or shell form for variable expansion
+CMD ["gunicorn", "--workers=2", "--threads=4", "--bind", "0.0.0.0:8000", "--timeout", "120", "backend.wsgi:application"]
