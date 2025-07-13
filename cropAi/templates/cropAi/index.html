@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CropShield AI</title>
     <link rel="icon" href="https://img.icons8.com/color/48/corn.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
     <style>
         :root {
             --primary: #27ae60;
@@ -23,7 +23,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
@@ -31,13 +31,14 @@
             color: var(--dark);
             line-height: 1.6;
             padding: 20px;
+            max-width: 100%;
         }
         
         .container {
             background: var(--white);
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            padding: 30px;
+            padding: 25px;
             max-width: 500px;
             margin: 0 auto;
         }
@@ -48,27 +49,19 @@
         }
         
         .logo {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             color: var(--primary);
             margin-bottom: 10px;
         }
         
         h1 {
             color: var(--primary);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
             font-size: 1.8rem;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: var(--dark-gray);
-            font-size: 0.95rem;
         }
         
         .upload-area {
             border: 2px dashed var(--primary);
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 30px;
             text-align: center;
             margin-bottom: 20px;
@@ -80,43 +73,21 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: rgba(46, 204, 113, 0.03);
         }
         
         .upload-area.has-image {
-            padding: 15px;
+            padding: 10px;
         }
         
         .upload-area:hover {
-            background-color: rgba(46, 204, 113, 0.08);
+            background-color: rgba(46, 204, 113, 0.1);
             border-color: var(--primary-light);
         }
         
         .upload-icon {
             font-size: 3rem;
             color: var(--primary);
-            margin-bottom: 15px;
-            transition: transform 0.3s ease;
-        }
-        
-        .upload-area:hover .upload-icon {
-            transform: scale(1.1);
-        }
-        
-        #uploadText {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 1.3rem;
-            color: var(--dark);
-            margin-bottom: 8px;
-        }
-        
-        .helper-text {
-            font-size: 0.9rem;
-            color: var(--dark-gray);
-            max-width: 80%;
-            margin: 0 auto;
-            line-height: 1.5;
+            margin-bottom: 10px;
         }
         
         .preview-img {
@@ -124,12 +95,27 @@
             max-height: 180px;
             border-radius: 8px;
             display: none;
-            object-fit: contain;
         }
         
         .file-info {
             margin-top: 10px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        .upload-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .upload-text {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 8px;
+        }
+        
+        .helper-text {
+            font-size: clamp(0.8rem, 2vw, 1rem);
             color: var(--dark-gray);
         }
         
@@ -137,7 +123,7 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 14px 25px;
+            padding: 12px 25px;
             border-radius: 25px;
             font-size: 1rem;
             cursor: pointer;
@@ -145,24 +131,18 @@
             transition: all 0.3s ease;
             font-weight: 600;
             margin-top: 10px;
-            font-family: 'Poppins', sans-serif;
-            letter-spacing: 0.5px;
         }
         
         .btn:hover {
             background-color: var(--primary-light);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
         }
         
         .btn:disabled {
             background-color: #bdc3c7;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
         
-        /* Rest of your existing CSS remains unchanged */
         .results {
             display: none;
             margin-top: 25px;
@@ -182,7 +162,6 @@
             font-weight: 600;
             color: var(--dark);
             margin-bottom: 5px;
-            font-family: 'Poppins', sans-serif;
         }
         
         .confidence-display {
@@ -223,7 +202,6 @@
         .cause h4, .treatment h4, .prevention h4 {
             margin-bottom: 8px;
             color: var(--dark);
-            font-family: 'Poppins', sans-serif;
         }
         
         .treatment-list, .prevention-list, .cause-list {
@@ -244,7 +222,6 @@
             background-color: rgba(46, 204, 113, 0.1);
             border-radius: 8px;
             text-align: center;
-            font-family: 'Poppins', sans-serif;
         }
         
         .loading {
@@ -263,7 +240,7 @@
             margin: 0 auto 10px;
         }
         
-        /* Toast Notifications (unchanged) */
+        /* Toast Notifications */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -361,7 +338,7 @@
         
         @media (max-width: 600px) {
             .container {
-                padding: 20px;
+                padding: 15px;
             }
             
             .header h1 {
@@ -369,20 +346,12 @@
             }
             
             .upload-area {
-                padding: 25px;
-                min-height: 180px;
-            }
-            
-            #uploadText {
-                font-size: 1.2rem;
-            }
-            
-            .helper-text {
-                font-size: 0.85rem;
+                padding: 20px;
+                min-height: 150px;
             }
             
             .preview-img {
-                max-height: 150px;
+                max-height: 120px;
             }
         }
     </style>
@@ -392,13 +361,15 @@
         <div class="header">
             <div class="logo">🌱</div>
             <h1>CropShield AI</h1>
-            <p>Detect maize diseases with AI</p>
+            <p>Detect maize diseases </p>
         </div>
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon" id="uploadIcon">📁</div>
-            <h3 id="uploadText">Upload Maize Leaf Image</h3>
-            <p class="helper-text">For best results, capture a close-up with clear details</p>
+            <div class="upload-text-container">
+                <h3 class="upload-text" id="uploadText">Upload Maize Leaf Image</h3>
+                <p class="helper-text">For best results, capture a close-up with clear details</p>
+            </div>
             <img id="previewImg" class="preview-img">
             <p id="fileInfo" class="file-info"></p>
             <input type="file" id="fileInput" accept="image/*" style="display: none;">
@@ -421,6 +392,7 @@
                     </div>
                 </div>
                 
+                <!-- Disease Sections (shown only for diseases) -->
                 <div id="diseaseSections" style="display: none;">
                     <div class="cause">
                         <h4>🦠 Causes</h4>
@@ -438,6 +410,7 @@
                     </div>
                 </div>
                 
+                <!-- Healthy Message (shown only for healthy plants) -->
                 <div id="healthyMessage" style="display: none;">
                     <p class="healthy-message">🌱 Your maize plant looks healthy! Keep up the good farming practices.</p>
                 </div>
@@ -450,7 +423,8 @@
         const uploadArea = document.getElementById('uploadArea');
         const uploadIcon = document.getElementById('uploadIcon');
         const uploadText = document.getElementById('uploadText');
-        const dropText = document.getElementById('dropText');
+        const uploadTextContainer = document.querySelector('.upload-text-container');
+        const helperText = document.querySelector('.helper-text');
         const fileInput = document.getElementById('fileInput');
         const analyzeBtn = document.getElementById('analyzeBtn');
         const previewImg = document.getElementById('previewImg');
@@ -521,15 +495,7 @@
                     </div>
                 `;
             } else if (type === 'success') {
-               /* toastContainer.innerHTML = `
-                    <div class="toast-success">
-                        <strong>Success</strong>
-                        <div class="toast-message">${message}</div>
-                        <button type="button" class="toast-close">×</button>
-                    </div>
-                `;*/
-
-                 toastContainer.innerHTML = `
+                toastContainer.innerHTML = `
                     <div class="toast-success">
                         <strong>Success</strong>
                         <button type="button" class="toast-close">×</button>
@@ -571,8 +537,7 @@
                 previewImg.src = e.target.result;
                 previewImg.style.display = 'block';
                 uploadIcon.style.display = 'none';
-                uploadText.style.display = 'none';
-                dropText.style.display = 'none';
+                uploadTextContainer.style.display = 'none';
                 uploadArea.classList.add('has-image');
                 fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
                 analyzeBtn.disabled = false;
@@ -599,7 +564,6 @@
             try {
                 const formData = new FormData();
                 formData.append('image', currentFile);
-                //('http://127.0.0.1:8000/api/', {
                 const serverResponse = await fetch('/api/', {
                     method: 'POST',
                     body: formData
